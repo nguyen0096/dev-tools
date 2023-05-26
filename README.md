@@ -1,10 +1,6 @@
-# ndv (N's dev-tools)
+# ndv
 
 Personal dev tools configurations for later reuse
-
-## Prerequisites
-
-- yq
 
 ## Features
 
