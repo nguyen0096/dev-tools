@@ -11,10 +11,10 @@ Configure AWS MFA session
 ``` yaml
 aws:
   mfas:
-    - profile: prophet # name of the profile to be authenticated, with access key configured
+    - profile: profile-name # name of the profile to be authenticated, with access key configured
       device: arn:aws:iam::xxxx:mfa/user.name # MFA device ARN
       session_duration: 129600
-      output_profile: prophet-eks # name of the profile to be created
+      output_profile: profile-name-eks # name of the profile to be created
 ```
 
 - Run `make aws_mfa TOKEN=123456`
