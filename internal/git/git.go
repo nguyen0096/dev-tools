@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"dev-tools/config"
 	"dev-tools/internal/domain"
+	"dev-tools/pkg/shell"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"text/template"
 	"time"
@@ -59,19 +61,18 @@ func updateRepo(rcfg config.Repository) error {
 		err = fmt.Errorf("failed to check worktree status. %w", err)
 		return err
 	}
-
 	if stt.IsClean() {
 		log.Printf("repo [%s] is clean. skipped", rcfg.Path)
 		return nil
 	}
 
-	if _, err := w.Add("."); err != nil {
-		err = fmt.Errorf("failed to add files. %w", err)
+	if err := gitAddDot(rcfg.Path); err != nil {
+		err = fmt.Errorf("failed to exec git add. %w", err)
 		return err
 	}
 
 	now := time.Now()
-	week, _ := now.ISOWeek()
+	_, week := now.ISOWeek()
 
 	dateFormat := rcfg.DateFormat
 	if dateFormat == "" {
@@ -87,10 +88,34 @@ func updateRepo(rcfg config.Repository) error {
 	buf := bytes.NewBuffer(nil)
 	t.Execute(buf, tmplVars)
 
-	if _, err := w.Commit(buf.String(), nil); err != nil {
+	if _, err := w.Commit(buf.String(), &git.CommitOptions{}); err != nil {
 		err = fmt.Errorf("failed to commit. %w", err)
 		return err
 	}
 
+	if err := r.Push(&git.PushOptions{}); err != nil {
+		err = fmt.Errorf("failed to push. %w", err)
+		return err
+	}
+
+	log.Printf("repo [%s] made new commit and pushed to remote", rcfg.Path)
+	return nil
+}
+
+func gitAddDot(path string) error {
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	if err := os.Chdir(path); err != nil {
+		return err
+	}
+	if o, err := shell.ExecOutput("git", "add", "."); err != nil {
+		err = fmt.Errorf("%w. %s", err, o)
+		return err
+	}
+	if err := os.Chdir(wd); err != nil {
+		return err
+	}
 	return nil
 }
