@@ -63,7 +63,7 @@ func updateRepo(rcfg config.Repository) error {
 		return err
 	}
 	if stt.IsClean() {
-		log.Printf("repo is clean. skipped", rcfg.Path)
+		log.Printf("repo is clean. skipped")
 		return nil
 	}
 
@@ -103,7 +103,7 @@ func updateRepo(rcfg config.Repository) error {
 		return err
 	}
 
-	log.Printf("made new commit and pushed to remote", rcfg.Path)
+	log.Printf("made new commit and pushed to remote")
 	return nil
 }
 
