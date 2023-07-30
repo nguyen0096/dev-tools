@@ -1,7 +1,8 @@
 package aws
 
 import (
-	"dev-tools/internal/config"
+	"dev-tools/config"
+	"dev-tools/internal/domain"
 	"dev-tools/pkg/shell"
 	"encoding/json"
 	"errors"
@@ -76,7 +77,7 @@ func setupMFA(mfa config.MFA) error {
 	}
 
 	// reoutput config again along with mfa session credential
-	if err := updateAWSCredentials([]config.Credential{
+	if err := updateAWSCredentials([]domain.Credential{
 		{
 			Profile:      mfa.OutputProfile,
 			Key:          res.Credential.AccessKeyID,
@@ -118,23 +119,25 @@ func setupMFA(mfa config.MFA) error {
 	return nil
 }
 
-func updateAWSCredentials(creds []config.Credential) error {
+func updateAWSCredentials(creds []domain.Credential) error {
 	for _, cred := range creds {
 		setAccessKeyCmd := []string{"aws", "configure", "set", "AWS_ACCESS_KEY_ID", cred.Key, "--profile", cred.Profile}
-		if err := shell.Exec(setAccessKeyCmd...); err != nil {
-			fmt.Errorf("failed to update aws access key for profile [%s]", cred.Profile)
+		if o, err := shell.ExecOutput(setAccessKeyCmd...); err != nil {
+			err = fmt.Errorf("failed to update aws access key for profile [%s]\n%s", cred.Profile, o)
+			return err
 		}
 
 		setAccessSecretCmd := []string{"aws", "configure", "set", "AWS_SECRET_ACCESS_KEY", cred.Secret, "--profile", cred.Profile}
-		if err := shell.Exec(setAccessSecretCmd...); err != nil {
-			fmt.Errorf("failed to update aws access secret for profile [%s]", cred.Profile)
+		if o, err := shell.ExecOutput(setAccessSecretCmd...); err != nil {
+			err = fmt.Errorf("failed to update aws access secret for profile [%s]\n%s", cred.Profile, o)
+			return err
 		}
 
 		setSessionTokenCmd := []string{"aws", "configure", "set", "AWS_SESSION_TOKEN", cred.SessionToken, "--profile", cred.Profile}
-		if err := shell.Exec(setSessionTokenCmd...); err != nil {
-			fmt.Errorf("failed to update aws session token for profile [%s]", cred.Profile)
+		if o, err := shell.ExecOutput(setSessionTokenCmd...); err != nil {
+			err = fmt.Errorf("failed to update aws session token for profile [%s]\n%s", cred.Profile, o)
+			return err
 		}
-
 		fmt.Printf("updated aws credentials for profile [%s]", cred.Profile)
 	}
 

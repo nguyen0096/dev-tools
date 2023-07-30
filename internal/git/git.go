@@ -2,14 +2,15 @@ package git
 
 import (
 	"bytes"
-	"dev-tools/internal/config"
-	"dev-tools/pkg/shell"
+	"dev-tools/config"
+	"dev-tools/internal/domain"
 	"fmt"
 	"log"
-	"os"
+	"strconv"
 	"text/template"
 	"time"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
 )
 
@@ -29,18 +30,9 @@ func commitUpdate() *cobra.Command {
 		Use:   "update",
 		Short: "Update repo with predefined commit message format",
 		Run: func(cmd *cobra.Command, args []string) {
-			for _, r := range config.Cfg.Git.Repos {
-				if err := os.Chdir(r.Path); err != nil {
-					log.Printf("failed to change working dir. err: %v", err)
-				}
-				if output, err := gitAddAll(); err != nil {
-					log.Printf("failed to run git add. err: %v. output: %s", err, output)
-				}
-				if output, err := gitCommit(r.MessageTemplate); err != nil {
-					log.Printf("failed to run git commit. err: %v. output: %s", err, output)
-				}
-				if output, err := gitPush(); err != nil {
-					log.Printf("failed to run git commit. err: %v. output: %s", err, output)
+			for _, rcfg := range config.Cfg.Git.Repos {
+				if err := updateRepo(rcfg); err != nil {
+					log.Printf("failed to update repo [%s]. err: %s", rcfg.Path, err)
 				}
 			}
 		},
@@ -49,38 +41,56 @@ func commitUpdate() *cobra.Command {
 	return commitUpdateCmd
 }
 
-func gitAddAll() (string, error) {
-	o, err := shell.ExecOutput("git", "add", ".")
+func updateRepo(rcfg config.Repository) error {
+	r, err := git.PlainOpen(rcfg.Path)
 	if err != nil {
-		return string(o), err
+		err = fmt.Errorf("failed to open git folder. %w", err)
+		return err
 	}
-	return string(o), nil
-}
 
-func gitCommit(msgTmpl string) (string, error) {
+	w, err := r.Worktree()
+	if err != nil {
+		err = fmt.Errorf("failed to get worktree. %w", err)
+		return err
+	}
+
+	stt, err := w.Status()
+	if err != nil {
+		err = fmt.Errorf("failed to check worktree status. %w", err)
+		return err
+	}
+
+	if stt.IsClean() {
+		log.Printf("repo [%s] is clean. skipped", rcfg.Path)
+		return nil
+	}
+
+	if _, err := w.Add("."); err != nil {
+		err = fmt.Errorf("failed to add files. %w", err)
+		return err
+	}
+
 	now := time.Now()
-	_, w := now.ISOWeek()
-	tmplVars := config.MessageVariables{
-		Week:          w,
-		OrdinalNumber: "001",
-		Date:          now.Format("060102_150405"),
+	week, _ := now.ISOWeek()
+
+	dateFormat := rcfg.DateFormat
+	if dateFormat == "" {
+		dateFormat = "060102_150405"
 	}
 
-	t := template.Must(template.New("git").Parse(msgTmpl))
+	tmplVars := domain.MessageVariables{
+		Week: strconv.Itoa(week),
+		Date: now.Format(dateFormat),
+	}
+
+	t := template.Must(template.New("git").Parse(rcfg.MessageTemplate))
 	buf := bytes.NewBuffer(nil)
 	t.Execute(buf, tmplVars)
 
-	o, err := shell.ExecOutput("git", "commit", "-m", fmt.Sprintf(`"%s"`, buf.String()))
-	if err != nil {
-		return string(o), err
+	if _, err := w.Commit(buf.String(), nil); err != nil {
+		err = fmt.Errorf("failed to commit. %w", err)
+		return err
 	}
-	return string(o), nil
-}
 
-func gitPush() (string, error) {
-	o, err := shell.ExecOutput("git", "push")
-	if err != nil {
-		return string(o), err
-	}
-	return string(o), nil
+	return nil
 }

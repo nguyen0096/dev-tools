@@ -1,8 +1,8 @@
 package main
 
 import (
+	"dev-tools/config"
 	"dev-tools/internal/aws"
-	"dev-tools/internal/config"
 	"dev-tools/internal/git"
 
 	"github.com/spf13/cobra"

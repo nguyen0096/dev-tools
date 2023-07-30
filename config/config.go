@@ -19,6 +19,27 @@ type Config struct {
 	Git GitConfig `yaml:"git"`
 }
 
+type AWSConfig struct {
+	MFAs []MFA `yaml:"mfas"`
+}
+
+type MFA struct {
+	Profile         string `json:"profile"`
+	Device          string `json:"device"`
+	SessionDuration int    `json:"session_duration"`
+	OutputProfile   string `json:"output_profile"`
+}
+
+type GitConfig struct {
+	Repos []Repository `json:"repositories"`
+}
+
+type Repository struct {
+	Path            string `json:"path"`
+	MessageTemplate string `json:"message_template"`
+	DateFormat      string `json:"date_format"`
+}
+
 func MustLoadConfig() error {
 	wd, err := os.Getwd()
 	if err != nil {
