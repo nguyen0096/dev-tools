@@ -4,26 +4,16 @@ type AWSConfig struct {
 	MFAs []MFA `yaml:"mfas"`
 }
 
-type AWSProfile struct {
-	Name   string `yaml:"name"`
-	Params struct {
-		Region        string `yaml:"region"`
-		Output        string `yaml:"output"`
-		RoleARN       string `yaml:"role_arn"`
-		SourceProfile string `yaml:"source_profile"`
-	} `yaml:"params"`
-}
-
 type Credential struct {
-	Profile      string `yaml:"name"`
-	Key          string `yaml:"key"`
-	Secret       string `yaml:"secret"`
-	SessionToken string `yaml:"session_token"`
+	Profile      string `json:"name"`
+	Key          string `json:"key"`
+	Secret       string `json:"secret"`
+	SessionToken string `json:"session_token"`
 }
 
 type MFA struct {
-	Profile         string `yaml:"profile"`
-	Device          string `yaml:"device"`
-	SessionDuration int64  `yaml:"session_duration"`
-	OutputProfile   string `yaml:"output_profile"`
+	Profile         string `json:"profile"`
+	Device          string `json:"device"`
+	SessionDuration int    `json:"session_duration"`
+	OutputProfile   string `json:"output_profile"`
 }

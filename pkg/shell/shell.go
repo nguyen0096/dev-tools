@@ -25,7 +25,7 @@ func ExecOutput(args ...string) ([]byte, error) {
 	}
 	announce(args...)
 	cmd := exec.Command(exe, args[1:]...)
-	return cmd.Output()
+	return cmd.CombinedOutput()
 }
 
 func announce(args ...string) {

@@ -17,4 +17,4 @@ aws:
       output_profile: profile-name-eks # name of the profile to be created
 ```
 
-- Run `make aws_mfa TOKEN=123456`
+- To configure AWS credentials and kubectl context, run `make aws_mfa TOKEN=123456`.

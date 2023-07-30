@@ -1,15 +1,20 @@
 package main
 
 import (
-	"os"
+	"dev-tools/internal/aws"
+	"dev-tools/internal/config"
+	"dev-tools/internal/git"
 
-	"dev-tools/cmd/root"
-	"dev-tools/internal/cmd"
+	"github.com/spf13/cobra"
 )
 
 func main() {
-	run := cmd.New()
-	rootCmd := root.NewRootCmd(run)
-	exitCode := run.Exec(rootCmd)
-	os.Exit(int(exitCode))
+	cmd := &cobra.Command{
+		Use:   "ndv",
+		Short: "A binary tools for working process automation",
+	}
+	config.MustLoadConfig()
+	cmd.AddCommand(aws.GetAWSCommand())
+	cmd.AddCommand(git.GetGitCommand())
+	cmd.Execute()
 }
