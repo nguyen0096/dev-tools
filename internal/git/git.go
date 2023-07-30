@@ -31,16 +31,16 @@ func commitUpdate() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			for _, r := range config.Cfg.Git.Repos {
 				if err := os.Chdir(r.Path); err != nil {
-					log.Fatalf("failed to change working dir. err: %v", err)
+					log.Printf("failed to change working dir. err: %v", err)
 				}
 				if output, err := gitAddAll(); err != nil {
-					log.Fatalf("failed to run git add. err: %v. output: %s", err, output)
+					log.Printf("failed to run git add. err: %v. output: %s", err, output)
 				}
 				if output, err := gitCommit(r.MessageTemplate); err != nil {
-					log.Fatalf("failed to run git commit. err: %v. output: %s", err, output)
+					log.Printf("failed to run git commit. err: %v. output: %s", err, output)
 				}
 				if output, err := gitPush(); err != nil {
-					log.Fatalf("failed to run git commit. err: %v. output: %s", err, output)
+					log.Printf("failed to run git commit. err: %v. output: %s", err, output)
 				}
 			}
 		},
