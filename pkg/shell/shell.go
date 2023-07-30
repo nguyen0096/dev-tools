@@ -30,7 +30,7 @@ func ExecOutput(args ...string) ([]byte, error) {
 }
 
 func announce(args ...string) {
-	log.Println(shellInspect(args))
+	log.Printf("shell: executing command [%s]", shellInspect(args))
 }
 
 func shellInspect(args []string) string {
