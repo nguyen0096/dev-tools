@@ -62,6 +62,7 @@ func gitCommit(msgTmpl string) (string, error) {
 	tmplVars := config.MessageVariables{
 		Week:          w,
 		OrdinalNumber: "001",
+		Date:          now.Format("060102_150405"),
 	}
 
 	t := template.Must(template.New("git").Parse(msgTmpl))

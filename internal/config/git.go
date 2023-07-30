@@ -7,6 +7,7 @@ type GitConfig struct {
 type MessageVariables struct {
 	OrdinalNumber string
 	Week          int
+	Date          string
 }
 
 type Repository struct {
