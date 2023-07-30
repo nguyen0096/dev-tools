@@ -33,12 +33,13 @@ func commitUpdate() *cobra.Command {
 				if err := os.Chdir(r.Path); err != nil {
 					log.Fatalf("failed to change working dir. err: %v", err)
 				}
-
 				if output, err := gitAddAll(); err != nil {
 					log.Fatalf("failed to run git add. err: %v. output: %s", err, output)
 				}
-
 				if output, err := gitCommit(r.MessageTemplate); err != nil {
+					log.Fatalf("failed to run git commit. err: %v. output: %s", err, output)
+				}
+				if output, err := gitPush(); err != nil {
 					log.Fatalf("failed to run git commit. err: %v. output: %s", err, output)
 				}
 			}
@@ -70,6 +71,14 @@ func gitCommit(msgTmpl string) (string, error) {
 	t.Execute(buf, tmplVars)
 
 	o, err := shell.ExecOutput("git", "commit", "-m", fmt.Sprintf(`"%s"`, buf.String()))
+	if err != nil {
+		return string(o), err
+	}
+	return string(o), nil
+}
+
+func gitPush() (string, error) {
+	o, err := shell.ExecOutput("git", "push")
 	if err != nil {
 		return string(o), err
 	}
