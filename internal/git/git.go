@@ -44,6 +44,7 @@ func commitUpdate() *cobra.Command {
 }
 
 func updateRepo(rcfg config.Repository) error {
+	log.Printf("=== repo [%s]", rcfg.Path)
 	r, err := git.PlainOpen(rcfg.Path)
 	if err != nil {
 		err = fmt.Errorf("failed to open git folder. %w", err)
@@ -62,7 +63,7 @@ func updateRepo(rcfg config.Repository) error {
 		return err
 	}
 	if stt.IsClean() {
-		log.Printf("repo [%s] is clean. skipped", rcfg.Path)
+		log.Printf("repo is clean. skipped", rcfg.Path)
 		return nil
 	}
 
@@ -94,11 +95,15 @@ func updateRepo(rcfg config.Repository) error {
 	}
 
 	if err := r.Push(&git.PushOptions{}); err != nil {
+		if err == git.NoErrAlreadyUpToDate {
+			log.Printf("failed to push. already up-to-date")
+			return nil
+		}
 		err = fmt.Errorf("failed to push. %w", err)
 		return err
 	}
 
-	log.Printf("repo [%s] made new commit and pushed to remote", rcfg.Path)
+	log.Printf("made new commit and pushed to remote", rcfg.Path)
 	return nil
 }
 
