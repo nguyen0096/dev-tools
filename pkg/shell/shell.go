@@ -2,6 +2,7 @@ package shell
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 
@@ -29,7 +30,7 @@ func ExecOutput(args ...string) ([]byte, error) {
 }
 
 func announce(args ...string) {
-	fmt.Println(shellInspect(args))
+	log.Println(shellInspect(args))
 }
 
 func shellInspect(args []string) string {
