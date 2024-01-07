@@ -24,10 +24,14 @@ type AWSConfig struct {
 }
 
 type MFA struct {
+	// Name of initial profile to do the MFA
 	Profile         string `json:"profile"`
 	Device          string `json:"device"`
 	SessionDuration int    `json:"session_duration"`
-	OutputProfile   string `json:"output_profile"`
+	// Name of the profile with the MFA session
+	OutputProfile string `json:"output_profile"`
+	// The name of the cluster for which to create a kubeconfig entry
+	ClusterName string `json:"cluster_name"`
 }
 
 type GitConfig struct {

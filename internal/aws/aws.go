@@ -92,7 +92,7 @@ func setupMFA(mfa config.MFA) error {
 		return err
 	}
 
-	raw, err = shell.ExecOutput("aws", "eks", "update-kubeconfig", "--name", "prophet-dev", "--profile", mfa.OutputProfile)
+	raw, err = shell.ExecOutput("aws", "eks", "update-kubeconfig", "--name", mfa.ClusterName, "--profile", mfa.OutputProfile)
 	if err != nil {
 		return err
 	}
